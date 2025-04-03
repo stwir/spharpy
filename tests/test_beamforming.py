@@ -26,6 +26,19 @@ def test_dolph_cheby_sidelobe():
     npt.assert_allclose(d_nm, truth)
 
 
+def test_mvdr_weights():
+    nSH = 4
+    sig = np.random.randn(1000, nSH)
+    sphCov = np.cov(sig, rowvar=False)
+    az = np.array([45, 60, 10, 20])
+    el = np.array([30, 20, 10, 0])
+    
+    coord = spharpy.samplings.Coordinates.from_spherical(np.array([1,1,1,1]) ,az, el)
+
+    d_mvdr = spharpy.beamforming.mvdr_weights(
+        sphCov, coord, diag_loading=0)
+    print(d_mvdr)
+
 def test_re_max():
     N = 7
     g_nm = spharpy.beamforming.rE_max_weights(N, normalize=False)

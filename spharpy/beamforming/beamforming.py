@@ -71,6 +71,62 @@ def dolph_chebyshev_weights(
     return spharpy.indexing.sph_identity_matrix(n_max, type='n-nm').T @ d_n
 
 
+def mvdr_weights(S_cov, 
+                 beam_dirs,
+                 diag_loading=0):
+    """Calculate the weights for a spherical MVDR beamformer.
+    The weights are calculated from the inverse of the covariance matrix
+    and the steering vector.
+
+    Parameters
+    ----------
+    S_cov : ndarray, double
+        The covariance matrix of the spherical array. The shape of the
+        covariance matrix should be (N, N) where N is the number of
+        SH degrees
+    beam_dirs : ndarray, double
+        The steering vector of the spherical array. The shape of the
+        steering vector should be (N, M) where N is the number of SH
+        degrees and M is the number of steering directions.
+    diag_loading : float, double
+        The diagonal loading parameter. This is used to improve the
+        robustness of the beamformer. The default value is 0 which
+        means no diagonal loading is applied.
+        
+    Returns
+    -------
+    weights : ndarray, double
+        An array containing the weight coefficients. The shape of the
+        weights array is (N, M) where N is the number of SH degrees
+        and M is the number of steering directions.
+    """
+    # Check if the covariance matrix is Hermitian
+    if not np.allclose(S_cov, S_cov.conj().T):
+        raise ValueError("Covariance matrix is not Hermitian")
+    # Check if the covariance matrix is positive definite
+    if np.any(np.linalg.eigvals(S_cov) <= 0):
+        raise ValueError("Covariance matrix is not positive definite")
+    # Check if the covariance matrix is square
+    if S_cov.shape[0] != S_cov.shape[1]:
+        raise ValueError("Covariance matrix is not square")
+
+    nSH = S_cov.shape[0]
+    order = np.sqrt(nSH) - 1
+    if order % 1 != 0:
+        raise ValueError("Number of spherical harmonics is not valid")
+    order = int(order)
+    n_dirs = beam_dirs.n_points
+    dir_weights = spharpy.spherical.spherical_harmonic_basis_real(nSH, beam_dirs)
+    weights = np.zeros((nSH, n_dirs), dtype=complex)
+    for i in range(n_dirs):
+        # Calculate the weights for each steering direction
+        S_cov_inv = np.linalg.inv(S_cov + diag_loading * np.eye(nSH))
+        weights[:, i] = S_cov_inv @ dir_weights[:, i]
+        # Normalize the weights
+        weights[:, i] /= (np.conj(weights[:, i]) @ dir_weights[:, i])
+    return weights
+
+
 def rE_max_weights(n_max, normalize=True):
     """Weights that maximize the length of the energy vector.
     This is most often used in Ambisonics decoding.
