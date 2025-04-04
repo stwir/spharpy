@@ -183,8 +183,7 @@ def cardioid_weights(n_max, normalize=True):
     if normalize:
         b_n = normalize_beamforming_weights(b_n, n_max)
 
-    return b_n
-    #return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
+    return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
 
 def rE_max_weights(n_max, normalize=True):
     """Weights that maximize the length of the energy vector.
