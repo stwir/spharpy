@@ -178,12 +178,13 @@ def cardioid_weights(n_max, normalize=True):
 
     b_n = np.zeros((n_max+1), dtype = float)
     for n in range(n_max+1):
-        b_n[n] = (np.sqrt(4*np.pi/(2*n+1)) * factorial(n_max)*factorial(n_max+1)) / (factorial(n_max+n)*factorial(n_max-n)) / (n_max+1)
+        b_n[n] = (np.sqrt(4*np.pi*(2*n+1)) * factorial(n_max, exact=False)*factorial(n_max+1, exact=False)) / (factorial(n_max+n+1, exact=False)*factorial(n_max-n, exact=False)) / (n_max+1)
 
     if normalize:
         b_n = normalize_beamforming_weights(b_n, n_max)
 
-    return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
+    return b_n
+    #return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
 
 def rE_max_weights(n_max, normalize=True):
     """Weights that maximize the length of the energy vector.
