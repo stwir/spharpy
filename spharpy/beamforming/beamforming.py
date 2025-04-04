@@ -128,7 +128,7 @@ def mvdr_weights(S_cov,
     d_nm = weights
     return d_nm
 
-def hypercardioid_weights(n_max):
+def hypercardioid_weights(n_max, normalize=True):
     """Weights that create a hypercardioid beam pattern.
     
     Adapted from: Archonits Politis (polarch) - Spherical-Array-Processing  
@@ -151,6 +151,37 @@ def hypercardioid_weights(n_max):
     b_n = np.zeros((n_max+1), dtype = float)
     for n in range(n_max+1):
         b_n[n] = c_n[0,(n+1)*n] 
+    if normalize: 
+        b_n = normalize_beamforming_weights(b_n, n_max)
+
+    return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
+
+def cardioid_weights(n_max, normalize=True):
+    """Weights that create a cardioid beam pattern.
+    
+    Adapted from: Archonits Politis (polarch) - Spherical-Array-Processing
+    
+    Parameters
+    ----------
+    n_max : int
+        The spherical harmonic order
+    normalize : bool (optional)
+        If `True`, the weights will be normalized such that the complex
+        amplitude of a plane wave is not distorted.
+
+    Returns
+    -------
+    weights : ndarray, double
+        An array containing the weight coefficients
+        
+    """
+
+    b_n = np.zeros((n_max+1), dtype = float)
+    for n in range(n_max+1):
+        b_n[n] = (np.sqrt(4*np.pi/(2*n+1)) * factorial(n_max)*factorial(n_max+1)) / (factorial(n_max+n)*factorial(n_max-n)) / (n_max+1)
+
+    if normalize:
+        b_n = normalize_beamforming_weights(b_n, n_max)
 
     return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
 
