@@ -124,8 +124,35 @@ def mvdr_weights(S_cov,
         weights[:, i] = S_cov_inv @ dir_weights[:, i]
         # Normalize the weights
         weights[:, i] /= (np.conj(weights[:, i]) @ dir_weights[:, i])
-    return weights
 
+    d_nm = weights
+    return d_nm
+
+def hypercardioid_weights(n_max):
+    """Weights that create a hypercardioid beam pattern.
+    
+    Adapted from: Archonits Politis (polarch) - Spherical-Array-Processing  
+    https://github.com/polarch/Spherical-Array-Processing
+    
+    Parameters
+    ----------
+    n_max : int
+        The spherical harmonic order
+
+    Returns
+    -------
+    weights : ndarray, double
+        An array containing the weight coefficients
+
+    """
+    c_n = 4*np.pi/(n_max+1)**2 * spharpy.spherical.spherical_harmonic_basis_real(
+        n_max, spharpy.samplings.Coordinates.from_spherical(1, 0, 0))
+    
+    b_n = np.zeros((n_max+1), dtype = float)
+    for n in range(n_max+1):
+        b_n[n] = c_n[0,(n+1)*n] 
+
+    return spharpy.indexing.sph_identity_matrix(n_max).T @ b_n
 
 def rE_max_weights(n_max, normalize=True):
     """Weights that maximize the length of the energy vector.

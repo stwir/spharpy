@@ -14,7 +14,6 @@ def test_dolph_cheby_mainlobe():
     truth = np.loadtxt('tests/data/dolph_cheby_mainlobe.csv', delimiter=',')
     npt.assert_allclose(d_nm, truth)
 
-
 def test_dolph_cheby_sidelobe():
     N = 7
     R_dB = 50
@@ -25,13 +24,12 @@ def test_dolph_cheby_sidelobe():
     truth = np.loadtxt('tests/data/dolph_cheby_sidelobe.csv', delimiter=',')
     npt.assert_allclose(d_nm, truth)
 
-
 def test_mvdr_weights():
     nSH = 4
     sig = np.random.randn(1000, nSH)
     sphCov = np.cov(sig, rowvar=False)
-    az = np.array([45, 60, 10, 20])
-    el = np.array([30, 20, 10, 0])
+    az = np.array([45, 60, 10, 20])/180*np.pi
+    el = np.array([30, 20, 10, 0])/180*np.pi
     
     coord = spharpy.samplings.Coordinates.from_spherical(np.array([1,1,1,1]) ,az, el)
 
